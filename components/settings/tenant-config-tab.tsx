@@ -24,10 +24,8 @@ interface TenantConfig {
 const FULFILLMENT_STATUS_OPTIONS = [
   { value: "pending", label: "Pending" },
   { value: "Tour_Orders", label: "Tour Orders" },
-  { value: "unfulfilled", label: "Unfulfilled" },
-  { value: "fulfilled", label: "Fulfilled" },
-  { value: "partially_fulfilled", label: "Partially Fulfilled" },
-  { value: "cancelled", label: "Cancelled" }
+  { value: "Training_Orders", label: "Training Orders" },
+  { value: "Sample_Orders", label: "Sample Orders" }
 ]
 
 export function TenantConfigTab() {
@@ -165,18 +163,7 @@ export function TenantConfigTab() {
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="shiphero_vendor_id">ShipHero Vendor ID</Label>
-              <Input
-                id="shiphero_vendor_id"
-                value={config.shiphero_vendor_id}
-                onChange={(e) => handleInputChange('shiphero_vendor_id', e.target.value)}
-                placeholder="1076735"
-              />
-              <p className="text-sm text-muted-foreground">
-                Required for purchase order creation. Get this from your ShipHero account.
-              </p>
-            </div>
+            {/* Vendor ID removed - no longer needed */}
 
             <div className="space-y-2">
               <Label htmlFor="fulfillment_status">Default Fulfillment Status</Label>

@@ -39,13 +39,25 @@ export function extractUniqueSKUs(orderSummary: any): string[] {
   console.log('📊 Extracting SKUs from order summary:', orderSummary)
   const skuSet = new Set<string>()
   
-  // The actual structure has sales_orders and purchase_orders
-  // Each order has the SKUs in the order_number (e.g., "BULK-001-Blue Raspberry Airhead")
-  // OR we need to extract from line items
+  // Extract from sales orders
+  if (orderSummary.sales_orders && Array.isArray(orderSummary.sales_orders)) {
+    orderSummary.sales_orders.forEach((order: any) => {
+      if (order.skus && Array.isArray(order.skus)) {
+        order.skus.forEach((sku: string) => skuSet.add(sku))
+      }
+    })
+  }
   
-  // For now, return empty array - we'll get SKUs from the workflow configs instead
-  // This is a limitation we should fix by storing SKUs in order_summary
+  // Extract from purchase orders
+  if (orderSummary.purchase_orders && Array.isArray(orderSummary.purchase_orders)) {
+    orderSummary.purchase_orders.forEach((order: any) => {
+      if (order.skus && Array.isArray(order.skus)) {
+        order.skus.forEach((sku: string) => skuSet.add(sku))
+      }
+    })
+  }
   
+  console.log(`✅ Extracted ${skuSet.size} unique SKUs`)
   return Array.from(skuSet).sort()
 }
 
@@ -77,7 +89,7 @@ export function groupOrdersByWorkflow(orderSummary: any) {
       salesByWorkflow[workflow].push({
         orderNumber: order.order_number,
         recipient: order.recipient || 'Unknown',
-        skus: [] // SKUs not stored in current structure
+        skus: order.skus || []
       })
     })
     
@@ -102,7 +114,7 @@ export function groupOrdersByWorkflow(orderSummary: any) {
       poByWorkflow[workflow].push({
         orderNumber: order.po_number,
         recipient: 'Purchase Order',
-        skus: []
+        skus: order.skus || []
       })
     })
     

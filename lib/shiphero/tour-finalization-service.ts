@@ -683,7 +683,8 @@ export class TourFinalizationService {
         workflow: "STD_REC",
         po_number: poInfo.po_number,
         shiphero_id: poInfo.id,
-        legacy_id: poInfo.legacy_id
+        legacy_id: poInfo.legacy_id,
+        skus: skus // Store SKUs for PDF generation
       })
     } else {
       console.error("❌ Failed to create Standard Receiving PO")
@@ -1029,7 +1030,8 @@ export class TourFinalizationService {
             order_number: orderNumber,
             shiphero_id: createdOrder.id,
             legacy_id: createdOrder.legacy_id,
-            recipient: recipient.type === 'extra' ? `${recipient.first_name} ${recipient.last_name} (extra)` : `${recipient.first_name} ${recipient.last_name}`
+            recipient: recipient.type === 'extra' ? `${recipient.first_name} ${recipient.last_name} (extra)` : `${recipient.first_name} ${recipient.last_name}`,
+            skus: lineItems.map((item: any) => item.sku) // Store SKUs for PDF generation
           })
         } else {
           console.error(`❌ Unexpected API response structure for ${orderNumber}`)
@@ -1180,7 +1182,8 @@ export class TourFinalizationService {
             legacy_id: createdOrder.legacy_id,
             recipient: recipient.type === 'extra' ? `${recipient.first_name} ${recipient.last_name} (extra)` : `${recipient.first_name} ${recipient.last_name}`,
             line_items: lineItems.length,
-            total_units: lineItems.reduce((sum, item) => sum + item.quantity, 0)
+            total_units: lineItems.reduce((sum, item) => sum + item.quantity, 0),
+            skus: lineItems.map((item: any) => item.sku) // Store SKUs for PDF generation
           })
         } else {
           console.error(`❌ Unexpected API response structure for ${orderNumber}`)
