@@ -1,35 +1,32 @@
-import JsBarcode from 'jsbarcode'
+import bwipjs from 'bwip-js'
 
 /**
  * Generate a barcode as a base64 data URL
  * Uses CODE128 format which is widely supported and scannable
  * 
- * This function dynamically imports canvas to avoid build-time issues
+ * Uses bwip-js which is pure JavaScript (no native dependencies)
  */
 export async function generateBarcodeBase64(sku: string): Promise<string> {
   try {
-    // Dynamic import of canvas to avoid build-time errors
-    const { createCanvas } = await import('canvas')
-    
-    // Create a canvas for the barcode
-    const canvas = createCanvas(400, 150) // Width x Height for good scannability
-    
-    // Generate barcode on canvas
-    JsBarcode(canvas, sku, {
-      format: 'CODE128',
-      width: 3, // Bar width
-      height: 100, // Bar height
-      displayValue: false, // We'll show SKU separately
-      margin: 10,
-      background: '#ffffff',
-      lineColor: '#000000',
+    // Generate barcode using bwip-js (pure JavaScript, works in Vercel)
+    const png = await bwipjs.toBuffer({
+      bcid: 'code128',       // Barcode type
+      text: sku,             // Text to encode
+      scale: 3,              // 3x scaling factor
+      height: 15,            // Bar height, in millimeters
+      width: 50,             // Bar width, in millimeters
+      includetext: false,    // Don't show text below barcode (we'll add it separately)
+      textxalign: 'center',  // Center the text
+      backgroundcolor: 'ffffff',
+      barcolor: '000000',
     })
     
-    // Convert to base64
-    return canvas.toDataURL('image/png')
+    // Convert buffer to base64 data URL
+    const base64 = png.toString('base64')
+    return `data:image/png;base64,${base64}`
   } catch (error) {
     console.error(`Error generating barcode for SKU ${sku}:`, error)
-    // Return a placeholder if barcode generation fails
+    // Return empty string if barcode generation fails
     return ''
   }
 }
