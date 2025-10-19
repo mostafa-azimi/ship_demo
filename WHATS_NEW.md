@@ -90,7 +90,7 @@ This will:
 4. Help with Vercel deployment
 5. Configure environment variables
 
-### 🎯 Next Steps for Testing
+### 🧪 How to Test Everything:
 
 1. **Create a new test tour**
    - Go to Schedule Tour
@@ -101,16 +101,16 @@ This will:
    - Go to View Tours
    - Click Finalize Tour
    - Configure workflows
-   - Orders will be created with **tomorrow's date** (1 day before tour)
+   - Orders will be created with **date 1 day before tour**
 
 3. **Download PDF**
    - Click "View Summary"
    - Click "Download Instructions PDF"
-   - Open PDF to see barcodes
+   - ✅ See all orders with **scannable barcodes**!
 
 4. **Test cancellation**
    - In tour summary, click "Cancel Entire Tour"
-   - All orders canceled in ShipHero
+   - All ShipHero orders canceled
    - Tour record remains for history
 
 ### 📊 What's Been Fixed
