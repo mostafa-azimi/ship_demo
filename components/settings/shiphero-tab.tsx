@@ -1046,15 +1046,17 @@ export function ShipHeroTab() {
               <div className="flex-1">
                 <Label className="text-xs text-amber-700 font-medium">DEV ONLY - Quick Copy Token</Label>
                 <div className="text-xs text-amber-600 font-mono break-all mt-1">
-                  qoarIpctSOD4bVxQoYM3pPiZZjlNS--N8gZxVIHjzdBZ9
+                  GYhwMmoD2OFRHLcWme9-wJuv-n80CO4i2b73GGBuDmSgG
                 </div>
               </div>
               <Button
                 onClick={() => {
-                  navigator.clipboard.writeText("qoarIpctSOD4bVxQoYM3pPiZZjlNS--N8gZxVIHjzdBZ9")
+                  const devToken = "GYhwMmoD2OFRHLcWme9-wJuv-n80CO4i2b73GGBuDmSgG"
+                  navigator.clipboard.writeText(devToken)
+                  setRefreshToken(devToken) // Also populate the input field
                   toast({
                     title: "📋 Copied!",
-                    description: "Dev refresh token copied to clipboard",
+                    description: "Dev refresh token copied to clipboard and populated in field",
                   })
                 }}
                 variant="outline"
