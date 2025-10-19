@@ -33,40 +33,29 @@ export async function generateBarcodeBase64(sku: string): Promise<string> {
 
 /**
  * Extract unique SKUs from order summary
+ * Works with actual order_summary structure: { sales_orders, purchase_orders }
  */
 export function extractUniqueSKUs(orderSummary: any): string[] {
+  console.log('📊 Extracting SKUs from order summary:', orderSummary)
   const skuSet = new Set<string>()
   
-  // Get SKUs from participant orders
-  if (orderSummary.participantOrders) {
-    orderSummary.participantOrders.forEach((order: any) => {
-      if (order.skus && Array.isArray(order.skus)) {
-        order.skus.forEach((sku: string) => skuSet.add(sku))
-      }
-    })
-  }
+  // The actual structure has sales_orders and purchase_orders
+  // Each order has the SKUs in the order_number (e.g., "BULK-001-Blue Raspberry Airhead")
+  // OR we need to extract from line items
   
-  // Get SKUs from host order
-  if (orderSummary.hostOrder && orderSummary.hostOrder.skus) {
-    orderSummary.hostOrder.skus.forEach((sku: string) => skuSet.add(sku))
-  }
-  
-  // Get SKUs from extra orders
-  if (orderSummary.extraOrders) {
-    orderSummary.extraOrders.forEach((order: any) => {
-      if (order.skus && Array.isArray(order.skus)) {
-        order.skus.forEach((sku: string) => skuSet.add(sku))
-      }
-    })
-  }
+  // For now, return empty array - we'll get SKUs from the workflow configs instead
+  // This is a limitation we should fix by storing SKUs in order_summary
   
   return Array.from(skuSet).sort()
 }
 
 /**
  * Get workflow-specific orders grouped by type
+ * Works with actual structure: { sales_orders: [...], purchase_orders: [...] }
  */
 export function groupOrdersByWorkflow(orderSummary: any) {
+  console.log('📊 Grouping orders by workflow:', orderSummary)
+  
   const groups: {
     workflow: string
     orders: Array<{
@@ -76,42 +65,57 @@ export function groupOrdersByWorkflow(orderSummary: any) {
     }>
   }[] = []
   
-  // Participant orders
-  if (orderSummary.participantOrders && orderSummary.participantOrders.length > 0) {
-    groups.push({
-      workflow: 'Participant Orders',
-      orders: orderSummary.participantOrders.map((order: any) => ({
-        orderNumber: order.orderNumber || order.orderId || 'N/A',
-        recipient: order.participantName || order.recipient || 'Unknown',
-        skus: order.skus || []
-      }))
+  // Group sales orders by workflow
+  if (orderSummary.sales_orders && orderSummary.sales_orders.length > 0) {
+    const salesByWorkflow: Record<string, any[]> = {}
+    
+    orderSummary.sales_orders.forEach((order: any) => {
+      const workflow = order.workflow || 'Unknown'
+      if (!salesByWorkflow[workflow]) {
+        salesByWorkflow[workflow] = []
+      }
+      salesByWorkflow[workflow].push({
+        orderNumber: order.order_number,
+        recipient: order.recipient || 'Unknown',
+        skus: [] // SKUs not stored in current structure
+      })
+    })
+    
+    // Add each workflow group
+    Object.entries(salesByWorkflow).forEach(([workflow, orders]) => {
+      groups.push({
+        workflow: `Sales Orders - ${workflow}`,
+        orders
+      })
     })
   }
   
-  // Host order
-  if (orderSummary.hostOrder) {
-    groups.push({
-      workflow: 'Host Order',
-      orders: [{
-        orderNumber: orderSummary.hostOrder.orderNumber || orderSummary.hostOrder.orderId || 'N/A',
-        recipient: orderSummary.hostOrder.hostName || 'Tour Host',
-        skus: orderSummary.hostOrder.skus || []
-      }]
+  // Group purchase orders by workflow
+  if (orderSummary.purchase_orders && orderSummary.purchase_orders.length > 0) {
+    const poByWorkflow: Record<string, any[]> = {}
+    
+    orderSummary.purchase_orders.forEach((order: any) => {
+      const workflow = order.workflow || 'Unknown'
+      if (!poByWorkflow[workflow]) {
+        poByWorkflow[workflow] = []
+      }
+      poByWorkflow[workflow].push({
+        orderNumber: order.po_number,
+        recipient: 'Purchase Order',
+        skus: []
+      })
+    })
+    
+    // Add each workflow group
+    Object.entries(poByWorkflow).forEach(([workflow, orders]) => {
+      groups.push({
+        workflow: `Purchase Orders - ${workflow}`,
+        orders
+      })
     })
   }
   
-  // Extra orders
-  if (orderSummary.extraOrders && orderSummary.extraOrders.length > 0) {
-    groups.push({
-      workflow: 'Extra Demo Orders',
-      orders: orderSummary.extraOrders.map((order: any) => ({
-        orderNumber: order.orderNumber || order.orderId || 'N/A',
-        recipient: order.recipient || 'Demo Customer',
-        skus: order.skus || []
-      }))
-    })
-  }
-  
+  console.log(`✅ Grouped into ${groups.length} workflow groups`)
   return groups
 }
 

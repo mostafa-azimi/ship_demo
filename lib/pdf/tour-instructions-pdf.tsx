@@ -181,22 +181,21 @@ export const TourInstructionsPDF: React.FC<TourInstructionsPDFProps> = ({
           </Text>
         </View>
 
-        {/* Summary */}
+        {/* Summary - Remove emojis, use text only */}
         <View style={styles.summary}>
           <Text style={styles.summaryText}>
-            📊 Total Participants: {tourData.participants.length}
+            Total Participants: {tourData.participants.length}
           </Text>
           <Text style={styles.summaryText}>
-            📦 Total Orders: {tourData.order_summary?.totalOrders || 0}
+            Total Sales Orders: {tourData.order_summary?.summary?.total_sales_orders || tourData.order_summary?.sales_orders?.length || 0}
           </Text>
           <Text style={styles.summaryText}>
-            ✅ Successful: {tourData.order_summary?.successCount || 0}
+            Total Purchase Orders: {tourData.order_summary?.summary?.total_purchase_orders || tourData.order_summary?.purchase_orders?.length || 0}
           </Text>
-          {tourData.order_summary?.failedCount > 0 && (
-            <Text style={styles.summaryText}>
-              ❌ Failed: {tourData.order_summary.failedCount}
-            </Text>
-          )}
+          <Text style={styles.summaryText}>
+            Total Orders: {tourData.order_summary?.summary?.total_orders || 
+              ((tourData.order_summary?.sales_orders?.length || 0) + (tourData.order_summary?.purchase_orders?.length || 0))}
+          </Text>
         </View>
 
         {/* Order Groups */}
