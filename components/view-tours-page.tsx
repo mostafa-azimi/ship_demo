@@ -176,6 +176,8 @@ export function ViewToursPage() {
 
   const fetchTours = async () => {
     try {
+      console.log('📋 Fetching tours from database...')
+      
       let query = supabase
         .from("tours")
         .select(
@@ -203,22 +205,32 @@ export function ViewToursPage() {
         .order("date", { ascending: false })
         .order("time", { ascending: false })
 
-      if (error) throw error
+      console.log('📋 Tours query result:', { count: data?.length || 0, error: error?.message })
+
+      if (error) {
+        console.error('❌ Error fetching tours:', error)
+        throw error
+      }
+      
       // Fix: Supabase returns warehouse, participants as arrays due to the select syntax.
       // We need to flatten those to objects/arrays as expected by the Tour type.
-      setTours(
-        (data || []).map((tour: any) => ({
-          ...tour,
-          warehouse: Array.isArray(tour.warehouse) ? tour.warehouse[0] : tour.warehouse,
-          participants: Array.isArray(tour.participants) ? tour.participants : [],
-        }))
-      )
-    } catch (error) {
+      const transformedTours = (data || []).map((tour: any) => ({
+        ...tour,
+        warehouse: Array.isArray(tour.warehouse) ? tour.warehouse[0] : tour.warehouse,
+        participants: Array.isArray(tour.participants) ? tour.participants : [],
+      }))
+      
+      console.log('✅ Tours loaded successfully:', transformedTours.length)
+      setTours(transformedTours)
+    } catch (error: any) {
+      console.error('❌ Failed to fetch tours:', error)
       toast({
         title: "Error",
-        description: "Failed to fetch tours",
+        description: `Failed to fetch tours: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       })
+      // Don't crash - show empty list
+      setTours([])
     } finally {
       setIsLoading(false)
     }
