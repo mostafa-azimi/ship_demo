@@ -18,7 +18,8 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  Download
 } from "lucide-react"
 
 interface TourSummaryData {
@@ -95,6 +96,7 @@ export function TourSummaryDialog({ isOpen, onClose, data }: TourSummaryDialogPr
   const [successfullyCanceledButtons, setSuccessfullyCanceledButtons] = useState<Set<string>>(new Set())
   const [entireTourCanceled, setEntireTourCanceled] = useState(false)
   const [canceledIndividualOrders, setCanceledIndividualOrders] = useState<Set<string>>(new Set())
+  const [isDownloadingPDF, setIsDownloadingPDF] = useState(false)
 
   // Initialize button states based on actual order statuses when dialog opens
   useEffect(() => {
@@ -786,19 +788,74 @@ export function TourSummaryDialog({ isOpen, onClose, data }: TourSummaryDialogPr
                 <div className="text-sm font-medium text-blue-900">Tour ID</div>
                 <div className="font-mono text-lg font-bold text-blue-800">{data.tourNumericId || 'Unknown'}</div>
               </div>
-              <Button asChild variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
-                <a 
-                  href={`https://app.shiphero.com/dashboard/orders/v2/manage?end_date=08%2F31%2F2026&preselectedDate=custom&tags=tour-${data.tourNumericId || data.tourId}`}
-                  target="_blank" 
-                  rel="noopener noreferrer"
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="border-green-300 text-green-700 hover:bg-green-50"
+                  onClick={async () => {
+                    setIsDownloadingPDF(true)
+                    try {
+                      const response = await fetch(`/api/tours/${data.tourId}/instructions-pdf`)
+                      
+                      if (!response.ok) {
+                        const error = await response.json()
+                        throw new Error(error.error || 'Failed to generate PDF')
+                      }
+                      
+                      const blob = await response.blob()
+                      const url = window.URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `Tour-${data.tourNumericId || data.tourId}-Instructions.pdf`
+                      document.body.appendChild(a)
+                      a.click()
+                      window.URL.revokeObjectURL(url)
+                      document.body.removeChild(a)
+                      
+                      toast({
+                        title: "PDF Downloaded",
+                        description: "Tour instructions PDF has been downloaded successfully.",
+                      })
+                    } catch (error: any) {
+                      console.error('Error downloading PDF:', error)
+                      toast({
+                        title: "Download Failed",
+                        description: error.message || "Failed to download tour instructions PDF.",
+                        variant: "destructive",
+                      })
+                    } finally {
+                      setIsDownloadingPDF(false)
+                    }
+                  }}
+                  disabled={isDownloadingPDF}
                 >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  View in ShipHero
-                </a>
-              </Button>
+                  {isDownloadingPDF ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Instructions PDF
+                    </>
+                  )}
+                </Button>
+                <Button asChild variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
+                  <a 
+                    href={`https://app.shiphero.com/dashboard/orders/v2/manage?end_date=08%2F31%2F2026&preselectedDate=custom&tags=tour-${data.tourNumericId || data.tourId}`}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View in ShipHero
+                  </a>
+                </Button>
+              </div>
             </div>
             <div className="text-xs text-blue-600 mt-1">
-              Click to view all orders (fulfilled & unfulfilled) with tag "tour-{data.tourNumericId || data.tourId}" in ShipHero dashboard
+              Download complete tour instructions with scannable barcodes, or view orders in ShipHero
             </div>
           </div>
 
