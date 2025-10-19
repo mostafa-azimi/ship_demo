@@ -1545,7 +1545,7 @@ export class TourFinalizationService {
         order_number: orderNumber,
         shop_name: "ShipHero Tour Demo",
         fulfillment_status: "pending",
-        order_date: new Date().toISOString().split('T')[0], // Date only format like adhoc
+        order_date: this.getOrderDate(tourData.date), // One business day before tour date
         total_tax: "0.00",
         subtotal: "0.00", 
         total_discounts: "0.00",
