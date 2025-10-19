@@ -206,14 +206,16 @@ export const TourInstructionsPDF: React.FC<TourInstructionsPDFProps> = ({
               {group.orders.map((order, orderIndex) => (
                 <View key={orderIndex} style={styles.orderItem}>
                   <Text style={styles.orderNumber}>
-                    📦 Order #{order.orderNumber}
+                    Order: {order.orderNumber}
                   </Text>
                   <Text style={styles.orderDetails}>
-                    → {order.recipient}
+                    Recipient: {order.recipient}
                   </Text>
-                  <Text style={styles.skuList}>
-                    SKUs: {order.skus.join(', ') || 'None'}
-                  </Text>
+                  {order.skus && order.skus.length > 0 && (
+                    <Text style={styles.skuList}>
+                      SKUs: {order.skus.join(', ')}
+                    </Text>
+                  )}
                 </View>
               ))}
             </View>
@@ -222,7 +224,7 @@ export const TourInstructionsPDF: React.FC<TourInstructionsPDFProps> = ({
 
         {/* Footer */}
         <Text style={styles.footer}>
-          Generated on {new Date().toLocaleString()} | ShipBots Tour Management System
+          Generated: {new Date().toLocaleString()} - ShipBots Tour Management System
         </Text>
       </Page>
 
