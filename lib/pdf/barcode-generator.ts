@@ -1,12 +1,16 @@
 import JsBarcode from 'jsbarcode'
-import { createCanvas } from 'canvas'
 
 /**
  * Generate a barcode as a base64 data URL
  * Uses CODE128 format which is widely supported and scannable
+ * 
+ * This function dynamically imports canvas to avoid build-time issues
  */
-export function generateBarcodeBase64(sku: string): string {
+export async function generateBarcodeBase64(sku: string): Promise<string> {
   try {
+    // Dynamic import of canvas to avoid build-time errors
+    const { createCanvas } = await import('canvas')
+    
     // Create a canvas for the barcode
     const canvas = createCanvas(400, 150) // Width x Height for good scannability
     

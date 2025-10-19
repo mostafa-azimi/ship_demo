@@ -49,31 +49,33 @@ export async function GET(
     
     // Generate barcodes for each unique SKU
     console.log(`📊 Generating barcodes for ${uniqueSKUs.length} unique SKUs...`)
-    const barcodes = uniqueSKUs.map(sku => {
-      const dataUrl = generateBarcodeBase64(sku)
-      
-      // Count how many orders use this SKU
-      let usageCount = 0
-      if (tourData.order_summary.participantOrders) {
-        tourData.order_summary.participantOrders.forEach((order: any) => {
-          if (order.skus && order.skus.includes(sku)) usageCount++
-        })
-      }
-      if (tourData.order_summary.hostOrder && tourData.order_summary.hostOrder.skus) {
-        if (tourData.order_summary.hostOrder.skus.includes(sku)) usageCount++
-      }
-      if (tourData.order_summary.extraOrders) {
-        tourData.order_summary.extraOrders.forEach((order: any) => {
-          if (order.skus && order.skus.includes(sku)) usageCount++
-        })
-      }
-      
-      return {
-        sku,
-        dataUrl,
-        usageCount
-      }
-    })
+    const barcodes = await Promise.all(
+      uniqueSKUs.map(async (sku) => {
+        const dataUrl = await generateBarcodeBase64(sku)
+        
+        // Count how many orders use this SKU
+        let usageCount = 0
+        if (tourData.order_summary.participantOrders) {
+          tourData.order_summary.participantOrders.forEach((order: any) => {
+            if (order.skus && order.skus.includes(sku)) usageCount++
+          })
+        }
+        if (tourData.order_summary.hostOrder && tourData.order_summary.hostOrder.skus) {
+          if (tourData.order_summary.hostOrder.skus.includes(sku)) usageCount++
+        }
+        if (tourData.order_summary.extraOrders) {
+          tourData.order_summary.extraOrders.forEach((order: any) => {
+            if (order.skus && order.skus.includes(sku)) usageCount++
+          })
+        }
+        
+        return {
+          sku,
+          dataUrl,
+          usageCount
+        }
+      })
+    )
 
     // Group orders by workflow
     const orderGroups = groupOrdersByWorkflow(tourData.order_summary)
