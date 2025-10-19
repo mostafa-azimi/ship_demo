@@ -1046,12 +1046,12 @@ export function ShipHeroTab() {
               <div className="flex-1">
                 <Label className="text-xs text-amber-700 font-medium">DEV ONLY - Quick Copy Token</Label>
                 <div className="text-xs text-amber-600 font-mono break-all mt-1">
-                  GYhwMmoD2OFRHLcWme9-wJuv-n80CO4i2b73GGBuDmSgG
+                  cxUd74cK5WZOi0N24hIm_EmwFZMx7EiUkFEJPBYab4RzQ
                 </div>
               </div>
               <Button
                 onClick={() => {
-                  const devToken = "GYhwMmoD2OFRHLcWme9-wJuv-n80CO4i2b73GGBuDmSgG"
+                  const devToken = "cxUd74cK5WZOi0N24hIm_EmwFZMx7EiUkFEJPBYab4RzQ"
                   navigator.clipboard.writeText(devToken)
                   setRefreshToken(devToken) // Also populate the input field
                   toast({
