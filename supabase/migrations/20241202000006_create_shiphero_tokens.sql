@@ -18,6 +18,7 @@ END;
 $$ language 'plpgsql';
 
 -- Create trigger to automatically update updated_at
+DROP TRIGGER IF EXISTS update_shiphero_tokens_updated_at ON public.shiphero_tokens;
 CREATE TRIGGER update_shiphero_tokens_updated_at 
     BEFORE UPDATE ON public.shiphero_tokens 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
